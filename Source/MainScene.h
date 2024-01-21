@@ -27,7 +27,7 @@
 
 #include "axmol.h"
 
-const int snakeBodies = 9;
+const int snakeBodies = 20;
 const int StartBodies = 4;
 
 class MainScene : public ax::Scene

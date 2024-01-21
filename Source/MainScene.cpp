@@ -128,8 +128,7 @@ bool MainScene::init()
 	else
 	{
 		// position the label on the center of the screen
-		label->setPosition(
-			Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - label->getContentSize().height));
+		label->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - label->getContentSize().height));
 
 		// add the label as a child to this layer
 		this->addChild(label, 1);
@@ -199,9 +198,9 @@ bool MainScene::init()
 	for (int i = 0; i < snakeBodies + 1; i++)
 	{
 		myScore[i] = 0.0;
-		sprintf(buffer, "%i: %f", i + 1, myScore[i]);
+	    sprintf(buffer, "%02i: %04.3f", i + 1, myScore[i]);
 		myScoreLabel[i] = Label::createWithTTF(std::string(buffer), "fonts/arial.ttf", 20);
-		myScoreLabel[i]->setAnchorPoint(Vec2(0, 1));
+		myScoreLabel[i]->setAnchorPoint(Vec2::ANCHOR_TOP_LEFT);
 		myScoreLabel[i]->setPosition(Vec2(10, origin.y + visibleSize.height - 10 - i * 20));
 		this->addChild(myScoreLabel[i], 1);
 	}
@@ -481,7 +480,7 @@ void MainScene::drawAll(bool finish)
 	// score
 	char buffer[124];
 	myScore[num - StartBodies] = endLevelTime;
-	sprintf(buffer, "%i: %f", num - StartBodies + 1, myScore[num - StartBodies]);
+	sprintf(buffer, "%02i: %04.3f", num - StartBodies + 1, myScore[num - StartBodies]);
 	myScoreLabel[num - StartBodies]->setString(buffer);
 
 
