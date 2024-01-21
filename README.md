@@ -1,7 +1,8 @@
 # Simple Snake 
-axis version of a "Simple Snake" game.
+Axmol version of a "Simple Snake" game.
+Using extension 'DrawNodeEx'
 
-![image](https://github.com/aismann/SimpleSnake/blob/master/Resources/screenshot.png)
+![image](https://github.com/aismann/SimpleSnake/blob/master/Content/screenshot.png)
 
 
 If you have any questions or want to continue this project feel free to do so.

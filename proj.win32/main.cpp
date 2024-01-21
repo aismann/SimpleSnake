@@ -1,7 +1,7 @@
 /****************************************************************************
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
- http://www.cocos2d-x.org
+ https://axmolengine.github.io/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 #include "main.h"
 #include "AppDelegate.h"
-#include "cocos2d.h"
+#include "axmol.h"
 
 USING_NS_AX;
 
@@ -34,6 +34,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // create the application instance
+#ifdef USE_WIN32_CONSOLE
+    AllocConsole();
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+#endif
+
+    // create the application instance
     AppDelegate app;
-    return Application::getInstance()->run();
+    int ret = Application::getInstance()->run();
+
+#ifdef USE_WIN32_CONSOLE
+    FreeConsole();
+#endif
 }

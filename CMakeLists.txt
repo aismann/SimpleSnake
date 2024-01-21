@@ -1,8 +1,8 @@
 #/****************************************************************************
 # Copyright (c) 2013-2014 cocos2d-x.org
-# Copyright (c) 2021-2022 Bytedance Inc.
+# Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 #
-# https://axis-project.github.io
+# https://axmolengine.github.io/
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,91 +29,111 @@ set(APP_NAME SimpleSnake)
 
 project(${APP_NAME})
 
-if(NOT DEFINED BUILD_ENGINE_DONE) # to test HelloCpp into root project
+if(NOT DEFINED BUILD_ENGINE_DONE) # to test SimpleSnake into root project
     if(XCODE)
         set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
     endif()
-    
+
     # config quick starter batch script run.bat for windows
     if(WIN32)
         file(RELATIVE_PATH CMAKE_BUILD_RELATIVE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
         configure_file("${CMAKE_CURRENT_SOURCE_DIR}/run.bat.in" "${CMAKE_CURRENT_SOURCE_DIR}/run.bat" @ONLY)
     endif()
 
-    set(AXIS_ROOT "$ENV{AXIS_ROOT}")
+    set(_AX_ROOT "$ENV{AX_ROOT}")
 
-    if(NOT (AXIS_ROOT STREQUAL ""))
-        set(AXIS_ROOT_PATH "${AXIS_ROOT}")
-        file(TO_CMAKE_PATH ${AXIS_ROOT_PATH} AXIS_ROOT_PATH) # string(REPLACE "\\" "/" AXIS_ROOT_PATH ${AXIS_ROOT_PATH})
-        message(STATUS "Using system env var AXIS_ROOT=${AXIS_ROOT}")
+    if(NOT (_AX_ROOT STREQUAL ""))
+        file(TO_CMAKE_PATH ${_AX_ROOT} _AX_ROOT)
+        message(STATUS "Using system env var _AX_ROOT=${_AX_ROOT}")
     else()
-        message(FATAL_ERROR "Please run setup.py add system env var 'AXIS_ROOT' to specific the engine root")
+        message(FATAL_ERROR "Please run setup.ps1 add system env var 'AX_ROOT' to specific the engine root")
     endif()
 
-    set(CMAKE_MODULE_PATH ${AXIS_ROOT_PATH}/cmake/Modules/)
+    set(CMAKE_MODULE_PATH ${_AX_ROOT}/cmake/Modules/)
 
-    include(AxisBuildSet)
+    include(AXBuildSet)
     set(_AX_USE_PREBUILT FALSE)
-    if (WIN32 AND DEFINED AX_PREBUILT_DIR AND IS_DIRECTORY ${AXIS_ROOT_PATH}/${AX_PREBUILT_DIR})
+    if ((WIN32 OR LINUX) AND DEFINED AX_PREBUILT_DIR AND IS_DIRECTORY ${_AX_ROOT}/${AX_PREBUILT_DIR})
         set(_AX_USE_PREBUILT TRUE)
     endif()
 
     if (NOT _AX_USE_PREBUILT)
-        add_subdirectory(${AXIS_ROOT_PATH}/core ${ENGINE_BINARY_PATH}/axis/core)
+        add_subdirectory(${_AX_ROOT}/core ${ENGINE_BINARY_PATH}/axmol/core)
     endif()
 endif()
 
-# record sources, headers, resources...
-set(GAME_SOURCE)
-set(GAME_HEADER)
-
-set(GAME_RES_FOLDER
-    "${CMAKE_CURRENT_SOURCE_DIR}/Resources"
+# The common cross-platforms source files and header files
+file(GLOB_RECURSE GAME_HEADER
+    Source/*.h Source/*.hpp
     )
-if(APPLE OR WINDOWS)
-    cocos_mark_multi_resources(common_res_files RES_TO "Resources" FOLDERS ${GAME_RES_FOLDER})
-endif()
+file(GLOB_RECURSE GAME_SOURCE
+    Source/*.cpp Source/*.c
+    )
 
-# add cross-platforms source files and header files 
-list(APPEND GAME_SOURCE
-     Classes/AppDelegate.cpp
-     Classes/SimpleSnakeScene.cpp
-     )
-list(APPEND GAME_HEADER
-     Classes/AppDelegate.h
-     Classes/SimpleSnakeScene.h
-     )
+set(GAME_INC_DIRS
+  "${CMAKE_CURRENT_SOURCE_DIR}/Source"
+)
+
+set(content_folder
+    "${CMAKE_CURRENT_SOURCE_DIR}/Content"
+    )
+
+if(APPLE)
+    ax_mark_multi_resources(common_content_files RES_TO "Resources" FOLDERS ${content_folder})
+elseif(WINDOWS)
+    ax_mark_multi_resources(common_content_files RES_TO "Content" FOLDERS ${content_folder})
+endif()
 
 if(ANDROID)
     # the APP_NAME should match on AndroidManifest.xml
     list(APPEND GAME_SOURCE
-         proj.android/app/jni/hellocpp/main.cpp
+         proj.android/app/jni/main.cpp
          )
 elseif(LINUX)
     list(APPEND GAME_SOURCE
          proj.linux/main.cpp
          )
-elseif(WINDOWS)
-    list(APPEND GAME_HEADER
-         proj.win32/main.h
-         proj.win32/resource.h
-         )
+    list(APPEND GAME_SOURCE ${common_content_files})
+elseif(WASM)
     list(APPEND GAME_SOURCE
-         proj.win32/main.cpp
-         proj.win32/game.rc
-         ${common_res_files}
+         proj.wasm/main.cpp
          )
+    list(APPEND GAME_SOURCE ${common_content_files})
+elseif(WINDOWS)
+    if(NOT WINRT)
+        list(APPEND GAME_HEADER
+            proj.win32/main.h
+            proj.win32/resource.h
+            )
+        list(APPEND GAME_SOURCE
+            proj.win32/main.cpp
+            proj.win32/game.rc
+            )
+    else()
+        ax_setup_winrt_sources()
+    endif()
+    list(APPEND GAME_SOURCE ${common_content_files})
 elseif(APPLE)
     if(IOS)
         list(APPEND GAME_HEADER
              proj.ios_mac/ios/AppController.h
              proj.ios_mac/ios/RootViewController.h
              )
-        set(APP_UI_RES
-            proj.ios_mac/ios/LaunchScreen.storyboard
-            proj.ios_mac/ios/LaunchScreenBackground.png
-            proj.ios_mac/ios/Images.xcassets
-            )
+
+        if (TVOS)
+            set(APP_UI_RES
+                proj.ios_mac/ios/targets/tvos/LaunchScreenBackground.png
+                proj.ios_mac/ios/targets/tvos/LaunchScreen.storyboard
+                proj.ios_mac/ios/targets/tvos/Images.xcassets
+                )
+        else()
+            set(APP_UI_RES
+                proj.ios_mac/ios/targets/ios/LaunchScreenBackground.png
+                proj.ios_mac/ios/targets/ios/LaunchScreen.storyboard
+                proj.ios_mac/ios/targets/ios/Images.xcassets
+                )
+        endif()
+
         list(APPEND GAME_SOURCE
              proj.ios_mac/ios/main.m
              proj.ios_mac/ios/AppController.mm
@@ -132,72 +152,86 @@ elseif(APPLE)
              ${APP_UI_RES}
              )
     endif()
-    list(APPEND GAME_SOURCE ${common_res_files})
+    list(APPEND GAME_SOURCE ${common_content_files})
 endif()
 
 # mark app complie info and libs info
-set(all_code_files
+set(APP_SOURCES
     ${GAME_HEADER}
     ${GAME_SOURCE}
     )
 if(NOT ANDROID)
-    add_executable(${APP_NAME} ${all_code_files})
+    add_executable(${APP_NAME} ${APP_SOURCES})
 else()
-    add_library(${APP_NAME} SHARED ${all_code_files})
+    add_library(${APP_NAME} SHARED ${APP_SOURCES})
     # whole archive for jni
-    add_subdirectory(${AXIS_ROOT_PATH}/core/platform/android ${ENGINE_BINARY_PATH}/core/platform)
     target_link_libraries(${APP_NAME} -Wl,--whole-archive cpp_android_spec -Wl,--no-whole-archive)
-    config_android_shared_libs("org.cocos2dx.lib" "${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/src")
+    config_android_shared_libs("org.axmol.lib" "${CMAKE_CURRENT_SOURCE_DIR}/proj.android/app/src")
 endif()
 
 if (NOT _AX_USE_PREBUILT)
-    target_link_libraries(${APP_NAME} ${AXIS_CORE_LIB})
+    target_link_libraries(${APP_NAME} ${_AX_CORE_LIB})
 endif()
 
-target_include_directories(${APP_NAME}
-        PRIVATE Classes
-        PRIVATE ${AXIS_ROOT_PATH}/core/audio
-)
+# The optional thirdparties(not dependent by engine)
+if (AX_WITH_YAML_CPP)
+    list(APPEND GAME_INC_DIRS "${_AX_ROOT}/thirdparty/yaml-cpp/include")
+endif()
 
-# mark app resources
-setup_cocos_app_config(${APP_NAME})
+target_include_directories(${APP_NAME} PRIVATE ${GAME_INC_DIRS})
+
+
+# mark app resources, resource will be copy auto after mark
+ax_setup_app_config(${APP_NAME})
 if(APPLE)
     set_target_properties(${APP_NAME} PROPERTIES RESOURCE "${APP_UI_RES}")
     set_xcode_property(${APP_NAME} INSTALL_PATH "\$(LOCAL_APPS_DIR)")
-    set_xcode_property(${APP_NAME} PRODUCT_BUNDLE_IDENTIFIER "org.axis.hellocpp")
+    set_xcode_property(${APP_NAME} PRODUCT_BUNDLE_IDENTIFIER "org.frankensoft.simplesnake")
 
     if(MACOSX)
         set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/proj.ios_mac/mac/Info.plist")
+    elseif(TVOS)
+        set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/proj.ios_mac/ios/targets/tvos/Info.plist")
+        set_xcode_property(${APP_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "Brand Assets")
     elseif(IOS)
-        set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/proj.ios_mac/ios/Info.plist")
+        set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/proj.ios_mac/ios/targets/ios/Info.plist")
         set_xcode_property(${APP_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
+        set_xcode_property(${APP_NAME} TARGETED_DEVICE_FAMILY "1,2")
     endif()
 
     # For code-signing, set the DEVELOPMENT_TEAM:
     #set_xcode_property(${APP_NAME} DEVELOPMENT_TEAM "GRLXXXX2K9")
 elseif(WINDOWS)
     if(NOT _AX_USE_PREBUILT)
-        cocos_copy_target_dll(${APP_NAME})
+        ax_sync_target_dlls(${APP_NAME})
     endif()
 endif()
 
-if((WINDOWS AND (CMAKE_GENERATOR STREQUAL "Ninja")) OR LINUX)
-    cocos_get_resource_path(APP_RES_DIR ${APP_NAME})
-    cocos_copy_target_res(${APP_NAME} LINK_TO ${APP_RES_DIR} FOLDERS ${GAME_RES_FOLDER})
-elseif(WINDOWS)
-    set_property(TARGET ${APP_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${GAME_RES_FOLDER}")
+if ((NOT APPLE) AND (NOT WINRT))
+    ax_get_resource_path(APP_RES_DIR ${APP_NAME})
+    ax_sync_target_res(${APP_NAME} LINK_TO ${APP_RES_DIR} FOLDERS ${content_folder} SYM_LINK 1)
+
+    if((WINDOWS AND (NOT (CMAKE_GENERATOR MATCHES "Ninja"))))
+        set_property(TARGET ${APP_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${content_folder}")
+        if(NOT DEFINED BUILD_ENGINE_DONE)
+            set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT ${APP_NAME})
+        endif()
+    endif()
+elseif(WINRT)
     if(NOT DEFINED BUILD_ENGINE_DONE)
         set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT ${APP_NAME})
     endif()
 endif()
 
-# The optional thirdparties(not dependent by engine)
-if (AX_WITH_YAML_CPP)
-    target_include_directories(${APP_NAME} PRIVATE ${AXIS_ROOT_PATH}/thirdparty/yaml-cpp/include)
-    target_link_libraries(${APP_NAME} yaml-cpp)
+if (_AX_USE_PREBUILT) # support windows and linux
+    use_ax_compile_define(${APP_NAME})
+
+    include(AXLinkHelpers)
+    ax_link_cxx_prebuilt(${APP_NAME} ${_AX_ROOT} ${AX_PREBUILT_DIR})
 endif()
 
-if (_AX_USE_PREBUILT) # support windows only
-    include(${AXIS_ROOT_PATH}/cmake/Modules/AxisLinkHelpers.cmake)
-    axis_link_cxx_prebuilt(${APP_NAME} ${AXIS_ROOT_PATH} ${AX_PREBUILT_DIR})
+if (NOT DEFINED BUILD_ENGINE_DONE)
+    ax_uwp_set_all_targets_deploy_min_version()
 endif()
+
+ax_setup_app_props(${APP_NAME})
