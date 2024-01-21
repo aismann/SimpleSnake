@@ -26,6 +26,7 @@
 #include "MainScene.h"
 
 USING_NS_AX;
+USING_NS_AX_EXT;
 
 struct Snake
 {
@@ -180,7 +181,7 @@ bool MainScene::init()
 	}
 	srand(time(0));
 
-	mydraw = DrawNode::create();
+	mydraw = DrawNodeEx::create();
 	addChild(mydraw, 10);
 
 	background = Sprite::create("Background.png");

@@ -26,6 +26,7 @@
 #define __MAIN_SCENE_H__
 
 #include "axmol.h"
+#include "extensions/DrawNodeEx/DrawNodeEx.h"
 
 const int snakeBodies = 20;
 const int StartBodies = 4;
@@ -69,7 +70,7 @@ public:
 private:
     GameState _gameState = GameState::init;
 	ax::Vec2 offset;
-	ax::DrawNode* mydraw;
+	ax::extension::DrawNodeEx* mydraw;
 
 	// game stuff
 	int N = 36, M = 36;
