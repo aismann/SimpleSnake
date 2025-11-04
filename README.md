@@ -13,7 +13,7 @@ If you have any questions or want to continue this project feel free to do so.
 - Use sprites unstead of draw primitives
 - Add some effects (sound, exploding stuff, traps, etc)
 
-- or use it as startup of your own snake version with axis
+- or use it as startup of your own snake version with Axmol
 
 ### Idea from here:
 https://www.youtube.com/channel/UCC7qpnId5RIQruKDJOt2exw
