@@ -1,8 +1,7 @@
 # Simple Snake 
-Axmol version of a "Simple Snake" game.
+Axmol V3 version of a "Simple Snake" game.
 
 ![image](https://github.com/aismann/SimpleSnake/blob/master/Content/ScreenShot.png)
-
 
 If you have any questions or want to continue this project feel free to do so.
 
@@ -12,7 +11,7 @@ If you have any questions or want to continue this project feel free to do so.
 - Use sprites unstead of draw primitives
 - Add some effects (sound, exploding stuff, traps, etc)
 
-- or use it as startup of your own snake version with Axmol
+- or use it as startup of your own snake version with Axmol V3
 
 ### Idea from here:
 https://www.youtube.com/channel/UCC7qpnId5RIQruKDJOt2exw
