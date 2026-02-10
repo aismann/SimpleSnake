@@ -178,7 +178,7 @@ bool MainScene::init()
         powerdBy->setPosition(Vec2(origin.x + visibleSize.width / 2, 130 + powerdBy->getContentSize().height * 3));
         this->addChild(powerdBy, 1);
 
-        auto axmolVer = Label::createWithTTF("AXMOL v3", "fonts/arial.ttf", 24);
+        auto axmolVer = Label::createWithTTF("AXMOL V3", "fonts/arial.ttf", 24);
         axmolVer->setPosition(Vec2(origin.x + visibleSize.width / 2, 100 + axmolVer->getContentSize().height * 3));
         // add the label as a child to this layer
         this->addChild(axmolVer, 1);
@@ -199,7 +199,6 @@ bool MainScene::init()
     s[0].y = 18;
 
     char buffer[1024];
-
     for (int i = 0; i < snakeBodies + 1; i++)
     {
         myScore[i] = 0.0;
