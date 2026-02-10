@@ -1,7 +1,8 @@
 /****************************************************************************
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
- Copyright (c) 2022-present @aismann; Peter Eismann, Germany; dreifrankensoft
+
+ https://axmol.dev/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +23,9 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __MAIN_SCENE_H__
-#define __MAIN_SCENE_H__
+#pragma once
 
-#include "axmol.h"
-#include "extensions/DrawNodeEx/DrawNodeEx.h"
+#include "axmol/axmol.h"
 
 const int snakeBodies = 20;
 const int StartBodies = 4;
@@ -42,12 +41,12 @@ class MainScene : public ax::Scene
         menu1,
         menu2,
     };
-    
+
 public:
     bool init() override;
     void update(float delta) override;
 
-	void drawAll(bool finish);
+    void drawAll(bool finish);
 
     // touch
     void onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event);
@@ -55,37 +54,43 @@ public:
     void onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event);
 
     // mouse
-    void onMouseDown(ax::Event* event);
-    void onMouseUp(ax::Event* event);
-    void onMouseMove(ax::Event* event);
-    void onMouseScroll(ax::Event* event);
+    bool onMouseDown(ax::Event* event);
+    bool onMouseUp(ax::Event* event);
+    bool onMouseMove(ax::Event* event);
+    bool onMouseScroll(ax::Event* event);
 
     // Keyboard
     void onKeyPressed(ax::EventKeyboard::KeyCode code, ax::Event* event);
     void onKeyReleased(ax::EventKeyboard::KeyCode code, ax::Event* event);
 
     // a selector callback
-    void menuCloseCallback(Ref* sender);
+    void menuCloseCallback(ax::Object* sender);
+
+    MainScene();
+    ~MainScene() override;
 
 private:
-    GameState _gameState = GameState::init;
-	ax::Vec2 offset;
-	ax::extension::DrawNodeEx* mydraw;
+    GameState _gameState                            = GameState::init;
+    ax::EventListenerTouchAllAtOnce* _touchListener = nullptr;
+    ax::EventListenerKeyboard* _keyboardListener    = nullptr;
+    ax::EventListenerMouse* _mouseListener          = nullptr;
+    int _sceneID                                    = 0;
 
-	// game stuff
-	int N = 36, M = 36;
-	int size    = 20;
-	int w       = size * N;
-	int h       = size * M;
-	float level = 0.1;
-	float myScore[snakeBodies + StartBodies];
+    ax::Vec2 offset;
+    ax::DrawNode* drawNode;
 
-	float startLevelTime = 0.0;
-	float endLevelTime   = 0.0;
+    // game stuff
+    int N = 36, M = 36;
+    int size    = 20;
+    int w       = size * N;
+    int h       = size * M;
+    float level = 0.1;
+    float myScore[snakeBodies + StartBodies];
 
-	int dir, num = StartBodies;
-	ax::Label* myScoreLabel[snakeBodies + 1];
-	ax::Sprite* background;
+    float startLevelTime = 0.0;
+    float endLevelTime   = 0.0;
+
+    int dir, num = StartBodies;
+    ax::Label* myScoreLabel[snakeBodies + 1];
+    ax::Sprite* background;
 };
-
-#endif  // __MAIN_SCENE_H__
